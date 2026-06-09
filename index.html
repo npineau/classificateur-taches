@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Classifieur de tâches — Help Animals</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F7F6F3;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: #1A1A1A;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .header {
+    margin-bottom: 1.75rem;
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: #787774;
+  }
+
+  /* Input step */
+  .input-wrap {
+    display: flex;
+    gap: 8px;
+  }
+
+  .input-wrap input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #E3E2DE;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+    color: #1A1A1A;
+  }
+
+  .input-wrap input:focus {
+    border-color: #A89BEE;
+  }
+
+  .input-wrap input::placeholder {
+    color: #AEACA7;
+  }
+
+  .btn-start {
+    padding: 10px 18px;
+    background: #7B6CE6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+
+  .btn-start:hover { background: #6455C9; }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1rem;
+    min-height: 20px;
+  }
+
+  .crumb {
+    font-size: 11px;
+    background: #EDEDEC;
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: #787774;
+  }
+
+  /* Task label */
+  .task-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .task-name {
+    font-size: 13px;
+    color: #787774;
+    max-width: 85%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-reset {
+    font-size: 12px;
+    color: #A89BEE;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+
+  .btn-reset:hover { background: #EDEDEC; }
+
+  /* Question card */
+  .q-card {
+    background: #fff;
+    border: 1px solid #E3E2DE;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .q-num {
+    font-size: 11px;
+    color: #AEACA7;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .q-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A1A1A;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .q-hint {
+    font-size: 13px;
+    color: #787774;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-yes, .btn-no {
+    flex: 1;
+    padding: 11px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn-yes:active, .btn-no:active { transform: scale(0.98); }
+
+  .btn-yes {
+    background: #EDF6E8;
+    border-color: #82C65E;
+    color: #2F6B14;
+  }
+
+  .btn-yes:hover { background: #DFF0D8; }
+
+  .btn-no {
+    background: #FCECEA;
+    border-color: #E5726A;
+    color: #8B2B27;
+  }
+
+  .btn-no:hover { background: #F8DEDD; }
+
+  /* Result cards */
+  .result-card {
+    border-radius: 12px;
+    padding: 1.75rem;
+    border: 1px solid;
+    text-align: center;
+  }
+
+  .result-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .result-label {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .result-task-chip {
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 12px;
+    background: rgba(255,255,255,0.55);
+    font-weight: 500;
+  }
+
+  .result-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-again {
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    border: 1px solid;
+    background: transparent;
+    transition: background 0.15s;
+  }
+
+  /* Structurant */
+  .r-structurant { background: #FEF0EC; border-color: #F0A08A; }
+  .r-structurant .result-label { color: #7A2B18; }
+  .r-structurant .result-desc { color: #994030; }
+  .r-structurant .result-task-chip { color: #7A2B18; }
+  .r-structurant .btn-again { border-color: #E5724A; color: #993C1D; }
+  .r-structurant .btn-again:hover { background: #FADDCF; }
+
+  /* Coordination rapide */
+  .r-coord { background: #FEF5E7; border-color: #F0BF6A; }
+  .r-coord .result-label { color: #7A4A10; }
+  .r-coord .result-desc { color: #9A6018; }
+  .r-coord .result-task-chip { color: #7A4A10; }
+  .r-coord .btn-again { border-color: #CCA040; color: #8A6010; }
+  .r-coord .btn-again:hover { background: #FCE8C0; }
+
+  /* Déléguable */
+  .r-delegable { background: #EBF3FD; border-color: #84B8EF; }
+  .r-delegable .result-label { color: #0E3D72; }
+  .r-delegable .result-desc { color: #1A5898; }
+  .r-delegable .result-task-chip { color: #0E3D72; }
+  .r-delegable .btn-again { border-color: #4A90D9; color: #185FA5; }
+  .r-delegable .btn-again:hover { background: #D6E9F8; }
+
+  /* Parking */
+  .r-parking { background: #F0EEFE; border-color: #B0A8EF; }
+  .r-parking .result-label { color: #2E2580; }
+  .r-parking .result-desc { color: #4A3FA8; }
+  .r-parking .result-task-chip { color: #2E2580; }
+  .r-parking .btn-again { border-color: #8A80DC; color: #534AB7; }
+  .r-parking .btn-again:hover { background: #DDD9F8; }
+
+  .hidden { display: none; }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 3px;
+    background: #E3E2DE;
+    border-radius: 3px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: #7B6CE6;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>Classifieur de tâches</h1>
+    <p>Réponds aux questions pour savoir comment traiter ta tâche.</p>
+  </div>
+
+  <!-- Étape 1 : saisie -->
+  <div id="step-input">
+    <div class="input-wrap">
+      <input type="text" id="task-input" placeholder="Décris ta tâche…" />
+      <button class="btn-start" onclick="startFlow()">→ Classer</button>
+    </div>
+  </div>
+
+  <!-- Étape 2 : questions -->
+  <div id="step-flow" class="hidden">
+    <div class="task-bar">
+      <span class="task-name" id="flow-task-name"></span>
+      <button class="btn-reset" onclick="restart()">↺ Recommencer</button>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="breadcrumb" id="breadcrumb"></div>
+    <div class="q-card">
+      <div class="q-num" id="q-num"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint" id="q-hint"></div>
+      <div class="btn-row">
+        <button class="btn-yes" onclick="answer(true)">✓ Oui</button>
+        <button class="btn-no" onclick="answer(false)">✗ Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Étape 3 : résultat -->
+  <div id="step-result" class="hidden">
+    <div class="task-bar">
+      <span class="task-name" id="result-task-name"></span>
+      <button class="btn-reset" onclick="restart()">↺ Recommencer</button>
+    </div>
+    <div class="breadcrumb" id="breadcrumb2"></div>
+    <div id="result-box"></div>
+  </div>
+</div>
+
+<script>
+  const qList = [
+    {
+      num: 1,
+      text: "Est-ce que ça débloque ou structure plusieurs personnes ?",
+      hint: "Planning, organisation, réunion, problème récurrent, coordination entre sites"
+    },
+    {
+      num: 2,
+      text: "Est-ce que quelqu'un attend une réponse ou validation ?",
+      hint: "Email simple, demande de congé, confirmation, validation rapide"
+    },
+    {
+      num: 3,
+      text: "Moins de 10–15 min et sans réflexion complexe ?",
+      hint: "Réponse courte, confirmation, validation simple"
+    },
+    {
+      num: 4,
+      text: "Quelqu'un d'autre peut le faire à 70% correctement ?",
+      hint: "Nettoyage, logistique, suivi simple, tâches répétitives"
+    },
+    {
+      num: 5,
+      text: "Si pas fait dans 7 jours, vraie conséquence ?",
+      hint: "Impact réel sur l'équipe, les animaux, les partenaires"
+    },
+    {
+      num: 6,
+      text: "Ça demande concentration / réflexion complexe ?",
+      hint: "Pour prévenir un problème ou améliorer durablement"
+    }
+  ];
+
+  const flow = {
+    q1: { q: 0, yes: "q2", no: "q2" },
+    q2: { q: 1, yes: "q3", no: "q4" },
+    q3: { q: 2, yes: "coord", no: "structurant" },
+    q4: { q: 3, yes: "delegable", no: "q5" },
+    q5: { q: 4, yes: "q6", no: "parking" },
+    q6: { q: 5, yes: "structurant", no: "coord" }
+  };
+
+  const results = {
+    structurant: {
+      icon: "🔴",
+      label: "Structurant",
+      desc: "À traiter le matin, quand ton énergie est haute. Bloque un vrai créneau sans interruption — cette tâche mérite toute ton attention.",
+      cls: "r-structurant"
+    },
+    coord: {
+      icon: "🟠",
+      label: "Coordination rapide",
+      desc: "En batch, pas en continu. Regroupe avec d'autres petites tâches similaires dans un même créneau dédié aux échanges.",
+      cls: "r-coord"
+    },
+    delegable: {
+      icon: "🔵",
+      label: "Déléguable",
+      desc: "Tu pilotes, tu ne fais pas. Identifie qui peut prendre ça en charge et transmets clairement les attentes.",
+      cls: "r-delegable"
+    },
+    parking: {
+      icon: "⚪",
+      label: "Parking",
+      desc: "Pas maintenant, pas prioritaire. Note-la et reviens-y quand le contexte le justifie.",
+      cls: "r-parking"
+    }
+  };
+
+  let current = "q1";
+  let task = "";
+  let history = [];
+
+  function startFlow() {
+    task = document.getElementById("task-input").value.trim();
+    if (!task) { document.getElementById("task-input").focus(); return; }
+    document.getElementById("flow-task-name").textContent = "📌 " + task;
+    document.getElementById("result-task-name").textContent = "📌 " + task;
+    document.getElementById("step-input").classList.add("hidden");
+    document.getElementById("step-flow").classList.remove("hidden");
+    current = "q1";
+    history = [];
+    renderQ();
+  }
+
+  function renderQ() {
+    const node = flow[current];
+    const q = qList[node.q];
+    const step = node.q + 1;
+    document.getElementById("q-num").textContent = "Question " + step + " / 6";
+    document.getElementById("q-text").textContent = q.text;
+    document.getElementById("q-hint").textContent = q.hint;
+    document.getElementById("progress-fill").style.width = ((step - 1) / 6 * 100) + "%";
+    renderCrumb("breadcrumb");
+  }
+
+  function answer(yes) {
+    const node = flow[current];
+    const q = qList[node.q];
+    const short = q.text.length > 42 ? q.text.substring(0, 40) + "…" : q.text;
+    history.push({ label: short, yes });
+    const next = yes ? node.yes : node.no;
+    if (results[next]) {
+      showResult(next);
+    } else {
+      current = next;
+      renderQ();
+    }
+  }
+
+  function showResult(key) {
+    document.getElementById("step-flow").classList.add("hidden");
+    document.getElementById("step-result").classList.remove("hidden");
+    renderCrumb("breadcrumb2");
+    const r = results[key];
+    document.getElementById("result-box").innerHTML = `
+      <div class="result-card ${r.cls}">
+        <span class="result-icon">${r.icon}</span>
+        <div class="result-label">${r.label}</div>
+        <span class="result-task-chip">${task}</span>
+        <div class="result-desc">${r.desc}</div>
+        <button class="btn-again" onclick="restart()">↺ Classer une autre tâche</button>
+      </div>
+    `;
+  }
+
+  function renderCrumb(id) {
+    document.getElementById(id).innerHTML = history
+      .map(h => `<span class="crumb">${h.yes ? "✓" : "✗"} ${h.label}</span>`)
+      .join("");
+  }
+
+  function restart() {
+    task = "";
+    current = "q1";
+    history = [];
+    document.getElementById("task-input").value = "";
+    document.getElementById("step-input").classList.remove("hidden");
+    document.getElementById("step-flow").classList.add("hidden");
+    document.getElementById("step-result").classList.add("hidden");
+  }
+
+  document.getElementById("task-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") startFlow();
+  });
+</script>
+</body>
+</html>
